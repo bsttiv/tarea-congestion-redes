@@ -260,7 +260,6 @@ class SocketTCP:
         data_to_send = SlidingWindowCC(window_size, [len(message).to_bytes(4, byteorder='big')] + data_list, self.num)
         if self.congestion_control_on:
             self._print_cc_debug("Inicio de transmisión", data_to_send)
-        self.socketudp.settimeout(2)
         self.socketudp.set_timer_list_length(1)
         if self.socketudp.timer_list[0] is not None:
             self.socketudp.stop_timer(0)
