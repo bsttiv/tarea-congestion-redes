@@ -87,7 +87,7 @@ def main():
             atender_retransmisiones(conn, args.silencio)
 
             estado = "OK" if datos == esperado else f"ERROR ({len(datos)} B recibidos)"
-            print(f"[Servidor] Prueba {n} desde {addr}: {estado} | ACKs enviados: {contador.enviados}")
+            print(f"[Servidor] Prueba {n} desde {conn.dest}: {estado} | ACKs enviados: {contador.enviados}")
     except KeyboardInterrupt:
         print("\n[Servidor] Terminado")
 
