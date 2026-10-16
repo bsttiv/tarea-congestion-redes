@@ -34,6 +34,7 @@ class SocketTCP:
         self.last_message_length = 0
         self.congestion_controler = CongestionControl(8)
         self.congestion_control_on = False
+        self.socketudp.settimeout(0.5)
 
     @staticmethod
     def parse_segment(segment):
