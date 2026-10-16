@@ -34,7 +34,7 @@ class SocketTCP:
         self.last_message_length = 0
         self.congestion_controler = CongestionControl(8)
         self.congestion_control_on = False
-        self.socketudp.settimeout(0.5)
+        self.timeout = 0.5
 
     @staticmethod
     def parse_segment(segment):
@@ -53,6 +53,9 @@ class SocketTCP:
     def create_segment(segment: TCPSegment):
         num = segment.flags | (segment.seq << 3)
         return num.to_bytes(4, byteorder='big') + segment.data
+
+    def set_timeout(self, timeout):
+        self.timeout = timeout
 
     def set_congestion_control_on(self, val: bool):
         self.congestion_control_on = val
@@ -252,6 +255,7 @@ class SocketTCP:
     def send_using_go_back_n(self, message):
         if not self.established: return
         self.socket.setblocking(False)
+        self.socketudp.settimeout(self.timeout)
         data_list = self.divide_message(message, 8)
         # se mandan los primeros n segmentos
         # se pone un timer luego de mandar el primer segmento de la ventana

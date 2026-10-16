@@ -45,7 +45,7 @@ def preparar_socket(cc_on: bool, timeout: float) -> SocketTCP:
         sendto_original(data, address, timer_index)
 
     udp.sendto = sendto_contando
-    udp.settimeout = lambda _t: SocketUDP.settimeout(udp, timeout)
+    s.set_timeout(timeout)
     return s
 
 
