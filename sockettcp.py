@@ -89,7 +89,7 @@ class SocketTCP:
                 if not (new_segment.syn and new_segment.ack) or (new_segment.seq != seq + 1): continue
                 ack_segment = TCPSegment(ACK, seq=seq + 1, data=b'')
                 raw_ack = self.create_segment(ack_segment)
-                self.socket.sendto(raw_ack, address)
+                self.socket.sendto(raw_ack, addr)
             except socket.timeout:
                 if DEBUG:
                     print(f"(debug): Manejando perdidas en funcion connect [Timeout esperando SYN+ACK (intento {intento+1}/5), retransmitiendo SYN]")
@@ -108,11 +108,13 @@ class SocketTCP:
                 break
         syn_ack_segment = TCPSegment(SYN | ACK, raw_segment.seq + 1, b'')
         raw_syn_ack = self.create_segment(syn_ack_segment)
-        self.socket.settimeout(2)
+        new_socket = SocketTCP()
+        new_socket.bind((self.socket.getsockname()[0], 0))
+        new_socket.socket.settimeout(2)
         for intento in range(0, 5):
             try:
-                self.socket.sendto(raw_syn_ack, addr)
-                new_raw_body, new_addr = self.socket.recvfrom(20)
+                new_socket.socket.sendto(raw_syn_ack, addr)
+                new_raw_body, new_addr = new_socket.socket.recvfrom(20)
             except socket.timeout:
                 if DEBUG:
                     print(f"(debug): Manejando perdidas en funcion accept [Timeout esperando ACK (intento {intento+1}/5), retransmitiendo SYN+ACK]")
@@ -123,15 +125,12 @@ class SocketTCP:
             if not (es_ack or es_datos): continue
             if es_datos and DEBUG:
                 print(f"(debug): Manejando perdidas en funcion accept [Detectada perdida de ultimo ACK del cliente, recibido paquete de datos]")
-            new_socket = SocketTCP()
-            new_socket.socketudp = self.socketudp
-            new_socket.socket = self.socket
             new_socket.dest = new_addr
             new_socket.num = syn_ack_segment.seq
-            self.num = syn_ack_segment.seq
-            self.established = True
             new_socket.established = True
-            self.socket.settimeout(None)
+            self.established = True
+            self.num = syn_ack_segment.seq
+            new_socket.socket.settimeout(None)
             return new_socket, new_addr
 
     def send(self, message: bytes, mode='stop_and_wait'):
