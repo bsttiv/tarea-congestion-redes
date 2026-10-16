@@ -19,13 +19,10 @@ class CongestionControl:
         elif self.current_state == CONGESTION_AVOIDANCE:
             self.cwnd += 1/self.get_MSS_in_cwnd() * self.MSS
     def event_timeout(self):
-        if self.current_state == SLOW_START and self.ssthresh is None:
-            self.ssthresh = int(self.get_cwnd()/2)
-            self.cwnd = self.MSS
-        elif self.current_state == CONGESTION_AVOIDANCE:
+        self.ssthresh = int(self.get_cwnd()/2)
+        self.cwnd = self.MSS
+        if self.current_state == CONGESTION_AVOIDANCE:
             self.current_state = SLOW_START
-            self.ssthresh = int(self.get_cwnd()/2)
-            self.cwnd = self.MSS
     def is_state_slow_start(self): return self.current_state == SLOW_START
     def is_state_congestion_avoidance(self): return self.current_state == CONGESTION_AVOIDANCE
     def get_ssthresh(self): return self.ssthresh 
